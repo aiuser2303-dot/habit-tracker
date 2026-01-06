@@ -42,6 +42,8 @@ const UI = {
     document.getElementById('settings-btn')?.addEventListener('click', () => this.openSettingsModal());
     document.getElementById('reset-data-btn')?.addEventListener('click', () => this.resetAllData());
     document.getElementById('test-email-btn')?.addEventListener('click', () => this.sendTestEmail());
+    document.getElementById('export-data-btn')?.addEventListener('click', () => this.exportData());
+    document.getElementById('delete-account-btn')?.addEventListener('click', () => this.deleteAccount());
     
     // Modal close buttons
     document.querySelectorAll('.modal-close, .modal-cancel, .modal-overlay').forEach(el => {
@@ -546,6 +548,123 @@ const UI = {
     } catch (error) {
       console.error('Test email error:', error);
       this.showToast('Failed to send test email: ' + error.message, 'error');
+    } finally {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  },
+  
+  // Export user data
+  async exportData() {
+    if (!this.currentUser) {
+      this.showToast('Please log in first', 'error');
+      return;
+    }
+    
+    const btn = document.getElementById('export-data-btn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Exporting...';
+    btn.disabled = true;
+    
+    try {
+      const { session } = await Auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No session token');
+      }
+      
+      const response = await fetch('/api/export-data', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `habit-tracker-data-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        this.showToast('Data exported successfully!', 'success');
+      } else {
+        const result = await response.json();
+        throw new Error(result.error || 'Export failed');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      this.showToast('Export failed: ' + error.message, 'error');
+    } finally {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  },
+  
+  // Delete account
+  async deleteAccount() {
+    if (!this.currentUser) {
+      this.showToast('Please log in first', 'error');
+      return;
+    }
+    
+    const confirmed = confirm(
+      'Are you sure you want to DELETE your account?\n\n' +
+      'This will permanently delete:\n' +
+      '• Your profile\n' +
+      '• All habits\n' +
+      '• All completion data\n' +
+      '• All achievements\n\n' +
+      'This action CANNOT be undone!'
+    );
+    
+    if (!confirmed) return;
+    
+    const doubleConfirm = prompt(
+      'Type "DELETE_MY_ACCOUNT" to confirm account deletion:'
+    );
+    
+    if (doubleConfirm !== 'DELETE_MY_ACCOUNT') {
+      this.showToast('Account deletion cancelled', 'info');
+      return;
+    }
+    
+    const btn = document.getElementById('delete-account-btn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Deleting...';
+    btn.disabled = true;
+    
+    try {
+      const { session } = await Auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No session token');
+      }
+      
+      const response = await fetch('/api/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ confirm: 'DELETE_MY_ACCOUNT' })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        this.showToast('Account deleted successfully', 'success');
+        // Sign out and redirect
+        await this.handleLogout();
+      } else {
+        throw new Error(result.error || 'Delete failed');
+      }
+    } catch (error) {
+      console.error('Delete account error:', error);
+      this.showToast('Delete failed: ' + error.message, 'error');
     } finally {
       btn.textContent = originalText;
       btn.disabled = false;
