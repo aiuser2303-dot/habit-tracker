@@ -224,7 +224,7 @@ export default async function handler(req, res) {
     
     for (const user of users) {
       try {
-        // Check if it's the right time for this user (based on their timezone)
+        // Calculate user's current time based on their timezone
         const userTimezone = user.timezone || 'UTC';
         let userHour;
         
@@ -242,7 +242,10 @@ export default async function handler(req, res) {
         
         const reminderHour = parseInt(user.reminder_time?.split(':')[0] || '22');
         
-        if (userHour !== reminderHour) {
+        // Check if it's the user's reminder time (within 1 hour window)
+        const isReminderTime = Math.abs(userHour - reminderHour) <= 1;
+        
+        if (!isReminderTime) {
           results.skipped++;
           continue; // Not time for this user's reminder
         }
