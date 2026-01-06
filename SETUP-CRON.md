@@ -13,7 +13,7 @@ Since your Vercel account has reached the cron job limit, use this free external
 1. Click "Create cronjob"
 2. Fill in details:
    - **Title:** `Habit Tracker Reminders`
-   - **Address (URL):** `https://your-app.vercel.app/api/cron/send-reminders`
+   - **Address (URL):** `https://your-app.vercel.app/api/scheduled/send-reminders`
    - **Schedule:** Select "Every hour" or use `0 * * * *`
    - **Enabled:** ✅ Check this box
 

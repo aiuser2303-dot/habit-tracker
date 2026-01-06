@@ -169,7 +169,7 @@ Since Vercel has cron job limits, we'll use a free external service:
 1. Go to [cron-job.org](https://cron-job.org)
 2. Create free account
 3. Add cron job:
-   - **URL:** `https://your-app.vercel.app/api/cron/send-reminders`
+   - **URL:** `https://your-app.vercel.app/api/scheduled/send-reminders`
    - **Schedule:** Every hour
    - **Header:** `Authorization: Bearer YOUR_CRON_SECRET`
 

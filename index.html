@@ -301,10 +301,17 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Test Email</label>
-          <button type="button" id="test-email-btn" class="btn btn-outline btn-sm" style="margin-top: 0.5rem;">
-            📧 Send Test Email
+          <label>Browser Notifications</label>
+          <div class="toggle-group">
+            <input type="checkbox" id="browser-notifications" checked>
+            <label for="browser-notifications">Enable browser notifications</label>
+          </div>
+          <button type="button" id="test-notification-btn" class="btn btn-outline btn-sm" style="margin-top: 0.5rem;">
+            🔔 Test Notification
           </button>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+            Get reminders even when the app is closed (requires permission)
+          </p>
         </div>
         <div class="form-group">
           <label>Data Management</label>
@@ -344,7 +351,17 @@
   <script src="js/habits.js"></script>
   <script src="js/analytics.js"></script>
   <script src="js/charts.js"></script>
+  <script src="js/notifications.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/js/service-worker.js')
+        .then(registration => console.log('SW registered'))
+        .catch(error => console.log('SW registration failed'));
+    }
+  </script>
 </body>
 </html>

@@ -42,6 +42,7 @@ const UI = {
     document.getElementById('settings-btn')?.addEventListener('click', () => this.openSettingsModal());
     document.getElementById('reset-data-btn')?.addEventListener('click', () => this.resetAllData());
     document.getElementById('test-email-btn')?.addEventListener('click', () => this.sendTestEmail());
+    document.getElementById('test-notification-btn')?.addEventListener('click', () => this.testNotification());
     document.getElementById('export-data-btn')?.addEventListener('click', () => this.exportData());
     document.getElementById('delete-account-btn')?.addEventListener('click', () => this.deleteAccount());
     
@@ -668,6 +669,22 @@ const UI = {
     } finally {
       btn.textContent = originalText;
       btn.disabled = false;
+    }
+  },
+  
+  // Test browser notification
+  async testNotification() {
+    const hasPermission = await Notifications.init();
+    
+    if (hasPermission) {
+      Notifications.showReminderNotification({
+        remaining: 3,
+        total: 5,
+        rate: 40
+      });
+      this.showToast('Test notification sent!', 'success');
+    } else {
+      this.showToast('Please enable notifications in your browser', 'error');
     }
   },
   

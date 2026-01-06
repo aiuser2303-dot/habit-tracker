@@ -52,6 +52,12 @@ const App = {
     UI.updateStats();
     UI.renderAchievements();
     
+    // Initialize notifications
+    await Notifications.init();
+    
+    // Check for missed reminders when app opens
+    Notifications.checkMissedReminders();
+    
     UI.showToast(`Welcome back, ${user.user_metadata?.full_name || user.email}!`, 'success');
   },
   
