@@ -154,29 +154,24 @@ After updating config, push to GitHub and Vercel will auto-redeploy.
 
 ---
 
-## 5. Cron Job (Email Reminders)
+## 5. Email Reminders Setup
 
-### Vercel Cron (Automatic)
-The `vercel.json` already configures a cron job:
-```json
-{
-  "crons": [{
-    "path": "/api/cron/send-reminders",
-    "schedule": "0 * * * *"
-  }]
-}
-```
-This runs every hour and checks each user's timezone to send reminders at their configured time.
+Since Vercel has cron job limits, we'll use a free external service:
 
-**Note:** Vercel Cron requires Pro plan. For free tier, use external cron.
+### Free External Cron (Recommended)
+1. **Deploy your app to Vercel first** (steps 1-4 above)
+2. **Follow the guide:** See `SETUP-CRON.md` for detailed instructions
+3. **Use cron-job.org** (free, reliable)
+4. **Set schedule:** Every hour (`0 * * * *`)
+5. **Add security:** Use your `CRON_SECRET` in Authorization header
 
-### External Cron (Free Alternative)
-Use [cron-job.org](https://cron-job.org) or [EasyCron](https://www.easycron.com):
-1. Create account
-2. Add new cron job:
-   - URL: `https://your-app.vercel.app/api/cron/send-reminders`
-   - Schedule: Every hour (`0 * * * *`)
-   - Headers: `Authorization: Bearer YOUR_CRON_SECRET`
+### Quick Setup:
+1. Go to [cron-job.org](https://cron-job.org)
+2. Create free account
+3. Add cron job:
+   - **URL:** `https://your-app.vercel.app/api/cron/send-reminders`
+   - **Schedule:** Every hour
+   - **Header:** `Authorization: Bearer YOUR_CRON_SECRET`
 
 ---
 
