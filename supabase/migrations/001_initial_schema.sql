@@ -207,6 +207,10 @@ BEGIN
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name'),
     NEW.raw_user_meta_data->>'avatar_url'
   );
+  
+  -- Create sample data for new user
+  PERFORM public.create_sample_data(NEW.id);
+  
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -343,14 +347,55 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================
--- GRANT PERMISSIONS FOR SERVICE ROLE
--- (Needed for Vercel serverless functions)
+-- SAMPLE DATA FUNCTION FOR NEW USERS
 -- ============================================
--- Service role can bypass RLS, but we need to ensure functions are accessible
-GRANT USAGE ON SCHEMA public TO service_role;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;
+CREATE OR REPLACE FUNCTION public.create_sample_data(p_user_id UUID)
+RETURNS VOID AS $$
+DECLARE
+  habit_ids UUID[];
+  habit_id UUID;
+  sample_date DATE;
+  i INTEGER;
+BEGIN
+  -- Create sample habits
+  INSERT INTO public.habits (user_id, name, description, category, color, monthly_goal, sort_order)
+  VALUES 
+    (p_user_id, 'Morning Exercise', 'Start the day with 30 minutes of exercise', 'fitness', '#EF4444', 25, 0),
+    (p_user_id, 'Read 30 Minutes', 'Read books or articles for personal growth', 'learning', '#3B82F6', 28, 1),
+    (p_user_id, 'Drink 8 Glasses of Water', 'Stay hydrated throughout the day', 'health', '#06B6D4', 30, 2),
+    (p_user_id, 'Meditate', '10-15 minutes of mindfulness meditation', 'mindfulness', '#8B5CF6', 25, 3),
+    (p_user_id, 'Journal', 'Write thoughts, gratitude, or reflections', 'mindfulness', '#EC4899', 20, 4)
+  RETURNING id INTO habit_ids;
+
+  -- Get all created habit IDs
+  SELECT ARRAY(
+    SELECT id FROM public.habits 
+    WHERE user_id = p_user_id 
+    ORDER BY sort_order
+  ) INTO habit_ids;
+
+  -- Create sample completions for the last 7 days
+  FOR i IN 0..6 LOOP
+    sample_date := CURRENT_DATE - i;
+    
+    -- Randomly complete some habits for each day (simulate realistic usage)
+    FOREACH habit_id IN ARRAY habit_ids LOOP
+      -- 70% chance of completion for each habit each day
+      IF random() < 0.7 THEN
+        INSERT INTO public.completions (habit_id, user_id, date, completed)
+        VALUES (habit_id, p_user_id, sample_date, true)
+        ON CONFLICT (habit_id, date) DO NOTHING;
+      END IF;
+    END LOOP;
+  END LOOP;
+
+  -- Create a sample achievement
+  INSERT INTO public.achievements (user_id, achievement_id, title, description, icon)
+  VALUES (p_user_id, 'first_habit', 'First Step', 'Created your first habit', '🌱')
+  ON CONFLICT (user_id, achievement_id) DO NOTHING;
+
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================
 -- SAMPLE DATA (Optional - for testing)
@@ -364,3 +409,13 @@ INSERT INTO public.habits (user_id, name, description, category, color, monthly_
   ('USER_ID', 'Drink 8 Glasses of Water', 'Stay hydrated throughout the day', 'health', '#06B6D4', 30),
   ('USER_ID', 'Meditate', '10-15 minutes of mindfulness meditation', 'mindfulness', '#8B5CF6', 25);
 */
+
+-- ============================================
+-- GRANT PERMISSIONS FOR SERVICE ROLE
+-- (Needed for Vercel serverless functions)
+-- ============================================
+-- Service role can bypass RLS, but we need to ensure functions are accessible
+GRANT USAGE ON SCHEMA public TO service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;

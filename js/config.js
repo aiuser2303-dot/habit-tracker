@@ -2,14 +2,14 @@
 const CONFIG = {
   // Supabase credentials - Replace with your own for production
   // Or set via environment variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
-  SUPABASE_URL: 'YOUR_SUPABASE_URL',
-  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',
+  SUPABASE_URL: 'https://ucvkavzsfpuuqulrppzy.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjdmthdnpzZnB1dXF1bHJwcHp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYxMTc4NzQsImV4cCI6MjA1MTY5Mzg3NH0.pZFJDvn4CTDkqgDtZEktKA_uK25BIbT',
   
   // Google OAuth Client ID (for Google Sign-In)
-  GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID',
+  GOOGLE_CLIENT_ID: '16193545770-nfdlubn1oluogvp3pe551akdfu1pkflp.apps.googleusercontent.com',
   
   // Local testing mode - set to false for production with Supabase
-  LOCAL_MODE: true,
+  LOCAL_MODE: false,
   
   // Default reminder settings
   DEFAULT_REMINDER_TIME: '22:00',
